@@ -17,35 +17,52 @@ export function usePlan(part) {
   const savedPlan = useRef(plan)
   // The version (updated_at) this window last saw; each save must match it or the API says 409.
   const version = useRef(part.updated_at)
+  const revision = useRef(0)
+  const saveQueue = useRef(Promise.resolve())
+  const mounted = useRef(false)
 
   useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false }
+  }, [])
+
+  useEffect(() => {
+    const editedRevision = revision.current
     // Just opened: nothing to save, but ask the API for warnings straight away.
     if (plan === savedPlan.current) {
-      validatePlan(plan).then((result) => setWarnings(result.warnings), () => {})
+      validatePlan(plan).then((result) => {
+        if (mounted.current && revision.current === editedRevision) setWarnings(result.warnings)
+      }, () => {})
       return
     }
     // Debounced save: rapid edits (typing, several clicks) become a single request.
     const timer = setTimeout(() => {
-      savePlan(part.id, plan, version.current).then(
-        (result) => {
+      // Wait for the previous save so this request uses its returned version.
+      saveQueue.current = saveQueue.current.then(async () => {
+        if (!mounted.current || revision.current !== editedRevision) return
+        try {
+          const result = await savePlan(part.id, plan, version.current)
           savedPlan.current = plan
           version.current = result.updated_at
+          // An older response must not mark newer unsaved edits as "Saved".
+          if (!mounted.current || revision.current !== editedRevision) return
           setWarnings(result.warnings)
           setSaveError(null)
           setSaveState('saved')
-        },
-        (err) => {
+        } catch (err) {
+          if (!mounted.current || revision.current !== editedRevision) return
           setSaveError(err.message)
           // 409: saved from another window since this one opened. Nothing was overwritten.
           setSaveState(err.status === 409 ? 'conflict' : 'error')
-        },
-      )
+        }
+      })
     }, SAVE_DELAY_MS)
     return () => clearTimeout(timer)
   }, [part.id, plan])
 
   // Every edit goes through here, so the "saving" status is set by the action itself.
   const edit = useCallback((change) => {
+    revision.current += 1
     setPlan((current) => ({ ...current, ...change(current) }))
     setSaveState('saving')
   }, [])

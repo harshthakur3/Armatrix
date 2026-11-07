@@ -26,7 +26,7 @@ export default function ExportButton({ part, saved }) {
         const job = await fetchWeldJob(part.id)
         downloadJson(job, `${part.name.replace(/\.stl$/i, '')}-weld-job.json`)
       } catch (err) {
-        setProblems(err.details.length ? err.details : [{ message: err.message }])
+        setProblems(err.details?.length ? err.details : [{ message: err.message }])
       }
     })
   }

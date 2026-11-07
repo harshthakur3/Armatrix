@@ -1,8 +1,9 @@
 const { createClient } = require('@supabase/supabase-js')
 
-const { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = process.env
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').trim().replace(/\/+$/, '')
+const SUPABASE_PUBLISHABLE_KEY = (process.env.SUPABASE_PUBLISHABLE_KEY || '').trim()
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY in backend/.env (see .env.example).')
+  throw new Error('Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY in the hosting environment, or backend/.env locally.')
 }
 
 // Middleware: checks the Supabase access token sent as `Authorization: Bearer <token>`.
