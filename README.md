@@ -4,6 +4,114 @@ A web app for uploading an STL part, selecting weld seams on its 3D model, setti
 
 This guide starts from a fresh computer and a new Supabase project. The React frontend and Express API run locally; Supabase hosts authentication, PostgreSQL, and private STL storage. An internet connection is required. This setup does not require Docker, a local PostgreSQL installation, or the Supabase CLI.
 
+[Features](#features) · [Architecture](#architecture) · [Key design decisions](#key-design-decisions) · [Local setup](#requirements) · [Exported JSON schema](#exported-weld-job-json-schema) · [Troubleshooting](#troubleshooting)
+
+## Features
+
+- Email/password sign-up, sign-in, sign-out, and protected planner pages.
+- Private STL uploads through a file picker or drag and drop, a saved parts list, and part deletion.
+- Binary and ASCII STL viewing with download progress, dimensions, triangle count, file-unit selection, and Y/Z up selection.
+- Orbit, pan, zoom, fit, isometric/top/front/right views, and shaded/edge/wireframe display modes.
+- Seam selection by tracing feature edges, including closed loops and splitting joints around intersecting geometry. Manual path drawing snaps points to nearby corners and edges.
+- Seam selection, deletion, weld-order changes, direction reversal, and start/end trimming for open paths.
+- MIG/TIG parameters, presets, copying parameters to all seams, validation warnings, and length/time/heat-input readouts.
+- Debounced auto-save, a saved/error indicator, and conflict detection when another window saves the same part.
+- JSON export with ordered, trimmed seam paths in millimetres and the selected process parameters.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  Browser["Browser<br/>React + Three.js"]
+  API["Node.js + Express API"]
+  Auth["Supabase Auth"]
+  Database["Supabase PostgreSQL<br/>parts and JSONB plans"]
+  Storage["Private Supabase Storage<br/>stl-files bucket"]
+
+  Browser -->|"Sign up / sign in"| Auth
+  Browser -->|"Upload / signed download"| Storage
+  Browser -->|"List / read / create part metadata"| Database
+  Browser -->|"Save / validate / presets / export / delete"| API
+  API -->|"Verify user on protected endpoints"| Auth
+  API -->|"Database access under user RLS"| Database
+  API -->|"Delete owned STL"| Storage
+```
+
+The browser owns the interactive editing session: it parses the STL, renders the model, finds selectable feature edges, and keeps the current plan in React state. Supabase stores accounts, part records, saved plans, and STL files. Express provides the welding rules and builds the exported job.
+
+| Operation | Request path |
+| --- | --- |
+| Sign up / sign in / sign out | Browser → Supabase Auth |
+| Upload an STL and create its part record | Browser → Supabase Storage, then PostgreSQL |
+| List or open a part | Browser → Supabase PostgreSQL |
+| Download the STL for viewing | Browser → Supabase signed URL → Storage |
+| Fetch presets or check a plan | Browser → Express; these two endpoints are public |
+| Save a plan, delete a part, or export a job | Browser → Express with a user token → Supabase under that user's permissions |
+
+### Upload and export flows
+
+An upload first stores the file at `<user-id>/<random-uuid>.stl`, then inserts its metadata into `public.parts`. If the metadata insert fails, the frontend attempts to remove the uploaded file. These are separate operations, so cleanup is a compensating action rather than an atomic transaction.
+
+Export loads the saved plan through the authenticated API, validates it again, applies trims and unit conversion, and returns the JSON. The frontend downloads that response without rebuilding or modifying its fields. Export is disabled while the editor reports unsaved changes.
+
+## Key design decisions
+
+### React and Vite for an interactive editor
+
+React keeps the seam list, selected seam, parameter fields, and viewer props connected to the same plan state. Small components make each interaction easier to follow, while `useStl` and `usePlan` contain loading and saving behavior. Auth is shared through Context; editing state stays close to the workspace, so a global state library is unnecessary for the current scope. This follows React's [state-driven UI model](https://react.dev/learn/state-a-components-memory).
+
+Vite provides the development server and produces a static frontend build. The app does its 3D work in the browser, so a server-rendering framework would add little to the current editor workflow. Pages and the viewer use dynamic imports; hover/focus preloading warms their JavaScript modules before navigation. It does not prefetch a part's database row or STL.
+
+### Three.js and React Three Fiber for browser geometry
+
+Three.js supplies STL parsing, geometry, edge extraction, camera controls, and the tube meshes used to display seams. React Three Fiber connects scene objects to React props and events, so selecting a seam in the sidebar can update the same seam in the canvas.
+
+Parsing and picking happen locally after download, which avoids a server round trip for every cursor movement. The tradeoff is browser CPU/GPU and memory use. The viewer renders on demand, disposes of geometry during cleanup, and skips feature-edge graph creation above 400,000 triangles. Manual drawing remains available, and simpler meshes are preferable for large parts. Edge tracing is a geometric heuristic rather than automatic recognition of every valid weld joint.
+
+### Node.js and Express for the welding API
+
+JavaScript is used across the browser and API, which makes the JSON plan and parameter names easy to follow through both sides. Express supplies a small route/middleware layer for presets, validation, saving, deletion, and export. The API spends much of its time waiting for Supabase requests, which fits Node's [asynchronous I/O model](https://nodejs.org/learn/getting-started/introduction-to-nodejs).
+
+This backend does not need to receive or parse the STL to export a job: the saved plan already contains its seam points. Expensive mesh processing or robot motion planning would need a separate execution strategy if added later.
+
+### Supabase for authentication, PostgreSQL, and private files
+
+Supabase gives the project one user identity across authentication, database records, and file access. The `parts.user_id` foreign key ties a part to its owner, and PostgreSQL Row Level Security uses `auth.uid()` to check ownership. Storage policies apply the same identity to the first folder in each file path.
+
+This keeps the project focused on seam planning instead of implementing password handling, session infrastructure, and an object-storage service. PostgreSQL provides relational ownership and timestamps, while JSONB holds the editable plan. The tradeoff is a dependency on a hosted service and network access; local frontend/API servers do not make the app fully offline.
+
+### Direct browser uploads instead of proxying STL files through Express
+
+The file is already in the browser and its final destination is Supabase Storage. Sending it directly avoids making the API receive and forward up to 50 MB for each upload. Express handles small JSON requests and does not need multipart upload handling, temporary files, or a large upload body limit. Its current JSON request limit is 2 MB.
+
+Direct upload still goes through Supabase's server-side access controls. The browser sends a publishable key and the user's access token; the private bucket's policies check the user-ID folder, and the bucket enforces the file-size cap. A publishable key is intended for client applications and grants only the access allowed by the configured policies. See [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys) and [Storage access control](https://supabase.com/docs/guides/storage/security/access-control).
+
+The frontend extension/size checks provide immediate feedback. They are not a replacement for server-enforced limits or content validation: this app parses STL content when opening the model, after upload. Routing files through Express would be useful if uploads needed server-side inspection, conversion, or processing before storage. The current upload uses a standard request rather than a resumable transfer, so unreliable connections are another limitation for larger files.
+
+Implementation: [uploadPart](frontend/src/lib/parts.js) and the [database/storage policies](backend/supabase/schema.sql).
+
+### Express for domain rules and export, with ownership enforced by RLS
+
+The app sends plan saves through Express to apply common welding validation and return useful warnings. Export runs that validation again before producing its final paths and process parameters. Deletion also goes through Express to coordinate file removal and database-row removal. These operations have more application logic than listing a user's files.
+
+Protected API routes verify the bearer token using Supabase Auth. The API then uses a publishable key plus that user's token, so its database operations retain the user's RLS permissions. It does not use an administrator key to bypass ownership checks. CORS controls browser origins; the token and RLS policies establish user access.
+
+RLS checks ownership, not welding semantics. The current table policies also allow an owner to update their row through Supabase directly, so Express is not an exclusive write boundary for `plan`. Revalidating at export is therefore important. A stricter deployment could restrict direct plan updates or enforce domain constraints at the database boundary. See [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+Implementation: [API requests](frontend/src/lib/api.js), [authentication middleware](backend/src/auth.js), [routes](backend/src/routes.js), and [weld validation/export](backend/src/weld.js).
+
+### JSONB plans, debounced saves, and version checks
+
+Each part stores one JSONB plan containing file units, up axis, and an ordered array of seams. That matches the editor: a part is loaded as one workspace and saved as one plan. Open paths, loops, trims, and MIG/TIG parameter sets fit naturally without separate tables for every point and setting.
+
+The tradeoff is that edits write the whole plan, and concurrent edits are not merged per seam. `usePlan` waits 600 ms after an edit before saving, reducing requests while a user types. It sends the last observed `updated_at` in an `If-Match` header; the API updates only that version. A mismatch returns HTTP 409 so another window's changes are not silently overwritten by that save.
+
+### Explicit units and an export separate from viewer state
+
+Saved points remain in the STL's original coordinate system. Centering the model and selecting Y/Z up changes its display without rewriting those points. The export converts paths to millimetres and applies trims; field suffixes state the parameter units. Seam order comes from array order, while IDs remain attached to their seams when reordered.
+
+The JSON is a general job format for a project demo. It can be input to a controller integration, but the app does not generate a calibrated robot program or a complete torch pose and motion trajectory.
+
 ## Requirements
 
 - **Node.js 22.12 or newer**, with npm. The locked Supabase packages require Node 22+, and Vite requires at least 22.12 on that release line. Install a supported Node version from [nodejs.org](https://nodejs.org/en/download).
@@ -71,14 +179,14 @@ If you are reusing a Supabase project where this script already succeeded, skip 
 
 In **Authentication**, open the email provider settings under **Sign In / Providers** (sometimes labelled **Providers**). Make sure email/password sign-in and new user sign-ups are allowed.
 
-Then open **Authentication → URL Configuration** and set:
+For local email redirects, open **Authentication → URL Configuration** and set:
 
 | Setting | Local value |
 | --- | --- |
 | Site URL | `http://localhost:5173` |
 | Redirect URLs | `http://localhost:5173/**` |
 
-The current app calls `signUp()` without an explicit email redirect URL, so confirmation emails use the **Site URL**. Use the frontend URL here, rather than the API URL on port 3000. See the [Supabase redirect URL documentation](https://supabase.com/docs/guides/auth/redirect-urls).
+Normal email/password sign-in returns a session and the React app navigates to `/parts`; it does not use the Site URL for that navigation. These settings matter for email confirmation and other redirect-based auth flows. The current app calls `signUp()` without an explicit email redirect URL, so confirmation emails use the **Site URL**. Use the frontend URL here, rather than the API URL on port 3000. See the [Supabase redirect URL documentation](https://supabase.com/docs/guides/auth/redirect-urls).
 
 Choose the email confirmation behavior for your development project:
 
@@ -189,6 +297,85 @@ Run each command from the directory shown:
 | `frontend` | `npm run preview -- --port 5173 --strictPort` | Preview the built frontend locally |
 
 For a production-build preview, stop the frontend development server, run `npm run build`, then run the preview command above. Keep the backend running. Using port 5173 lets the same local auth and CORS settings continue to work. Vite reads `VITE_` variables during the build, so rebuild after changing them.
+
+## Exported weld job JSON schema
+
+The API returns this job from `GET /api/parts/:id/weld-job`, and **Export weld job** downloads it as `<part-name>-weld-job.json`. The [complete four-seam landing-page example](frontend/src/assets/examples/bracket-weld-job.json) uses the same format as the backend exporter.
+
+### Job and part fields
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `schema_version` | string | Export format version; currently `"1.0"`. |
+| `generated_at` | string | UTC generation time in ISO 8601 format. |
+| `part` | object | Identifies the source part and how its original coordinates were interpreted. |
+| `part.id` | string | The part's UUID from the `parts` table. |
+| `part.name` | string | Original uploaded filename, such as `t-joint.stl`. |
+| `part.source_units` | string | User-selected original file units: `mm`, `cm`, `m`, or `in`. Exported paths always use mm. |
+| `part.up_axis` | string | The selected original up axis: `y` or `z`. |
+| `coordinate_frame` | string | Always `"stl_part"`: points use the STL part's original origin and axes, with distances converted to mm. |
+| `seams` | array of objects | Seams in the requested welding order. A job must contain at least one seam to export. |
+
+### Fields in each seam
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `id` | string | Seam identifier from the plan, such as `S01`. |
+| `sequence` | integer | One-based weld order derived from the seam's current array position. |
+| `process` | string | `MIG` or `TIG`; determines which parameter fields apply. |
+| `closed` | boolean | When true, the path also connects its last point back to its first point. |
+| `path_mm` | array of `[x, y, z]` arrays | Ordered path points in millimetres, rounded to three decimal places. Open-path start/end trims are already applied; the first point is the welding start. |
+| `params` | object | Process parameters described below. |
+
+### Fields in `params`
+
+| Field | Applies to | Unit | Meaning |
+| --- | --- | --- | --- |
+| `current_a` | MIG and TIG | A | Selected welding current. |
+| `voltage_v` | MIG | V | Selected welding voltage; omitted for TIG. |
+| `wire_feed_m_min` | MIG | m/min | Selected wire feed rate; omitted for TIG. |
+| `travel_speed_mm_s` | MIG and TIG | mm/s | Selected travel speed along the seam. |
+| `work_angle_deg` | MIG and TIG | degrees | User-specified torch work angle. |
+| `travel_angle_deg` | MIG and TIG | degrees | User-specified torch travel angle. |
+| `weld_size_mm` | MIG and TIG | mm | Desired weld size. |
+
+Process parameters required by the selected process must be present before export. Values outside typical preset ranges produce warnings in the editor; those warnings alone do not block export. Angles are plan settings, not a fully specified 3D tool orientation. Camera settings, model triangles, raw trim offsets, and UI statistics are not included in this export.
+
+### Complete single-seam example
+
+```json
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-07T18:19:08.351Z",
+  "part": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "name": "t-joint.stl",
+    "source_units": "mm",
+    "up_axis": "z"
+  },
+  "coordinate_frame": "stl_part",
+  "seams": [
+    {
+      "id": "S01",
+      "sequence": 1,
+      "process": "MIG",
+      "closed": false,
+      "path_mm": [[0, 70, 12], [300, 70, 12]],
+      "params": {
+        "current_a": 180,
+        "voltage_v": 22,
+        "wire_feed_m_min": 8,
+        "travel_speed_mm_s": 6,
+        "work_angle_deg": 45,
+        "travel_angle_deg": 10,
+        "weld_size_mm": 6
+      }
+    }
+  ]
+}
+```
+
+The part UUID and timestamp above are example values. Reordering seams changes their sequence; reversing a seam changes its path direction. A controller integration must resolve `stl_part` into the physical cell's calibrated frame before using these points for motion.
 
 ## Troubleshooting
 
