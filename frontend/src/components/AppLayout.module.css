@@ -1,0 +1,30 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 64px;
+  padding: 0 var(--page-margin);
+  border-bottom: 1px solid var(--border-hair);
+  background: var(--bg-raised);
+}
+
+.user {
+  margin-left: auto;
+  color: var(--fg-subtle);
+}
+
+@media (max-width: 640px) {
+  .user {
+    display: none;
+  }
+
+  .bar .btn {
+    margin-left: auto;
+  }
+}

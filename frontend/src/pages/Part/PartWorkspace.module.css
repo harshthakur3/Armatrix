@@ -1,0 +1,254 @@
+/* Full-height planner: viewport takes every spare pixel, inspector is a fixed rail. */
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  height: calc(100svh - 65px);
+  min-height: 480px;
+}
+
+/* Viewport */
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-dark-forest-t2);
+}
+
+/* Pointer cursor while an edge or seam under the mouse can be clicked. */
+.viewport[data-picking] canvas {
+  cursor: pointer;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  color: var(--fg-subtle);
+  text-align: center;
+}
+
+.progress {
+  width: min(240px, 60%);
+  height: 2px;
+  background: var(--border);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--signal);
+  transition: width 120ms linear;
+}
+
+.errorTitle {
+  color: var(--signal);
+}
+
+.toolbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toolbar > * {
+  pointer-events: auto;
+}
+
+.toolGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status,
+.legend {
+  position: absolute;
+  bottom: 16px;
+  margin: 0;
+  color: var(--fg-subtle);
+  pointer-events: none;
+}
+
+.status {
+  left: 16px;
+}
+
+.legend {
+  right: 16px;
+  display: flex;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li,
+.facts dt[data-axis] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend li::before,
+.facts dt[data-axis]::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--axis-color);
+}
+
+[data-axis='x'] {
+  --axis-color: var(--color-bright-discovery);
+}
+
+[data-axis='y'] {
+  --axis-color: var(--color-revolution-green-t4);
+}
+
+[data-axis='z'] {
+  --axis-color: var(--color-light-sand);
+}
+
+/* Inspector */
+
+.inspector {
+  overflow-y: auto;
+  border-left: 1px solid var(--border-hair);
+  background: var(--bg);
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-hair);
+}
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.save {
+  color: var(--fg-subtle);
+}
+
+.save[data-state='error'],
+.save[data-state='conflict'] {
+  color: var(--signal);
+}
+
+.back {
+  color: var(--fg-subtle);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--fg);
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.facts {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.factRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.facts dt {
+  color: var(--fg-subtle);
+}
+
+.facts dd {
+  margin: 0;
+  font: 400 14px var(--font-transmit);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+  text-align: right;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--fg-subtle);
+}
+
+.field select {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+  color: var(--fg);
+  font: 400 14px var(--font-transmit);
+}
+
+.field select:focus-visible {
+  outline: none;
+  border-color: var(--signal);
+}
+
+.muted {
+  color: var(--fg-subtle);
+}
+
+.shortcuts dd {
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 24px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: 500 11px/1.4 var(--font-command);
+  text-align: center;
+  color: var(--fg);
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60svh auto;
+    height: auto;
+  }
+
+  .inspector {
+    border-left: 0;
+    border-top: 1px solid var(--border-hair);
+  }
+
+  .shortcuts {
+    display: none;
+  }
+}
+
+.reload {
+  margin-top: 10px;
+}

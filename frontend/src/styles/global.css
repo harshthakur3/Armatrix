@@ -1,0 +1,289 @@
+/*
+ * Armatrix design system.
+ * Every colour comes from Theme/03 Colours System (opacity variants of those
+ * swatches only) and every font from Theme/04 Fonts System. Font roles,
+ * spacing and type treatments follow the brand as used on armatrix.com.
+ */
+
+@font-face {
+  font-family: 'Onest';
+  src: url('../assets/fonts/onest-latin.woff') format('woff');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: '42dot Sans';
+  src: url('../assets/fonts/42dot-sans-latin.woff') format('woff');
+  font-weight: 300 800;
+  font-display: swap;
+}
+
+:root {
+  /* Palette */
+  --color-dark-forest: #030500;
+  --color-dark-forest-t1: #090d00;
+  --color-dark-forest-t2: #0e1600;
+  --color-dark-forest-t3: #141e00;
+  --color-dark-forest-t4: #192600;
+  --color-light-sand: #f6f6ee;
+  --color-light-sand-t1: #dfdfd7;
+  --color-light-sand-t2: #c5c5bd;
+  --color-light-sand-t3: #ababa5;
+  --color-light-sand-t4: #93938d;
+  --color-revolution-green: #2b381f;
+  --color-revolution-green-t1: #344425;
+  --color-revolution-green-t2: #3d4f2c;
+  --color-revolution-green-t3: #455b32;
+  --color-revolution-green-t4: #628047;
+  --color-bright-discovery: #e97f01;
+  --color-bright-discovery-t1: #e98917;
+  --color-bright-discovery-t4: #e9b475;
+
+  /* Font roles: Onest commands (headings, labels, buttons), 42dot Sans transmits (body). */
+  --font-command: 'Onest', system-ui, sans-serif;
+  --font-transmit: '42dot Sans', system-ui, sans-serif;
+
+  /* Surfaces: Dark Forest canvas, Revolution Green panels, Light Sand type, Bright Discovery signal. */
+  --bg: var(--color-dark-forest);
+  --bg-raised: var(--color-dark-forest-t2);
+  --fg: var(--color-light-sand);
+  --fg-muted: var(--color-light-sand-t3);
+  --fg-subtle: rgb(246 246 238 / 0.55);
+  --border: rgb(246 246 238 / 0.14);
+  --border-hair: rgb(246 246 238 / 0.08);
+  --signal: var(--color-bright-discovery);
+  --signal-hover: var(--color-bright-discovery-t1);
+  --panel: linear-gradient(
+    135deg,
+    var(--color-dark-forest-t3) 0%,
+    var(--color-revolution-green) 55%,
+    var(--color-revolution-green-t3) 100%
+  );
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.06em;
+  --tracking-label: 0.12em;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-btn: 12px;
+  --ease-out: cubic-bezier(0.16, 0.84, 0.32, 1);
+  --dur-base: 200ms;
+
+  --page-width: 1280px;
+  --page-margin: clamp(16px, 4vw, 40px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-command);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-command);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: var(--tracking-tight);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--color-dark-forest);
+}
+
+/* Type treatments */
+
+.body-copy {
+  font-family: var(--font-transmit);
+  color: var(--fg-muted);
+}
+
+.label {
+  font: 500 11px/1.45 var(--font-command);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Bracketed status tag: [ NO PARTS YET ] */
+.tag {
+  font-weight: 700;
+  color: var(--fg-subtle);
+}
+
+/* Label preceded by a small signal square: ■ GEOMETRY */
+.marked {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.marked::before {
+  content: '';
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--signal);
+}
+
+/* Inline alert. The palette has no red, so Bright Discovery marks problems. */
+.callout {
+  padding: 12px 14px;
+  border-left: 3px solid var(--signal);
+  background: rgb(233 127 1 / 0.1);
+  font: 400 14px/1.5 var(--font-transmit);
+}
+
+/* Section title flanked by signal squares: ■ USE CASES ■ */
+.section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 24px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.section-title::before,
+.section-title::after {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  background: var(--signal);
+}
+
+/* Corner pins on framed panels. Parent must be position: relative. */
+.pin {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--signal);
+  pointer-events: none;
+}
+
+/* Framed Revolution Green panel with an inner hairline, as on the brand illustrations. */
+.panel {
+  position: relative;
+  background: var(--panel);
+}
+
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 28px;
+  border: 1px solid var(--border-hair);
+  pointer-events: none;
+}
+
+.pin-tl { top: 10px; left: 10px; }
+.pin-tr { top: 10px; right: 10px; }
+.pin-bl { bottom: 10px; left: 10px; }
+.pin-br { bottom: 10px; right: 10px; }
+
+/* Buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 14px 22px;
+  border: 1px solid var(--color-revolution-green-t3);
+  border-radius: var(--radius-btn);
+  font: 500 13px/1.45 var(--font-command);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.btn-arrow {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.btn:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+/* Primary action: the one place Bright Discovery fills a surface. */
+.btn-solid {
+  border-color: var(--signal);
+  background: var(--signal);
+  color: var(--color-dark-forest);
+}
+
+.btn-solid:hover:not(:disabled) {
+  border-color: var(--signal-hover);
+  background: var(--signal-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--signal);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--color-revolution-green-t4);
+}
+
+.btn-sm {
+  min-height: 40px;
+  padding: 10px 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

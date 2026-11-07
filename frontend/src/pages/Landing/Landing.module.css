@@ -1,0 +1,384 @@
+/* Hero */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: min(100svh, 920px);
+  padding: 0 var(--page-margin) clamp(48px, 7vw, 88px);
+  border-bottom: 1px solid var(--border-hair);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 28px 0;
+}
+
+.navLinks {
+  display: flex;
+  gap: 28px;
+  margin-left: auto;
+}
+
+.navLinks a {
+  font: 500 14px/1.45 var(--font-command);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg-subtle);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.navLinks a:hover {
+  color: var(--fg);
+}
+
+.heroGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+  width: 100%;
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding-top: clamp(24px, 4vw, 48px);
+}
+
+.heroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.headline {
+  font-size: clamp(44px, 5.4vw, 76px);
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 34ch;
+  font-size: clamp(18px, 1.7vw, 22px);
+  line-height: 1.5;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* 3D viewport inside a brand panel */
+
+.viewport {
+  aspect-ratio: 5 / 4;
+}
+
+.viewportCanvas {
+  position: absolute;
+  inset: 0;
+}
+
+.hudTop {
+  position: absolute;
+  top: 36px;
+  left: 40px;
+  right: 40px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--fg-subtle);
+  pointer-events: none;
+}
+
+.hudSeams {
+  position: absolute;
+  left: 40px;
+  bottom: 36px;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-light-sand-t2);
+  pointer-events: none;
+}
+
+.hudSeams li {
+  display: grid;
+  grid-template-columns: 34px 112px auto;
+  gap: 10px;
+}
+
+.hudId {
+  color: var(--signal);
+}
+
+.hudMeta {
+  color: var(--fg-subtle);
+}
+
+/* Sections */
+
+.section {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: clamp(64px, 9vw, 120px) var(--page-margin) 0;
+}
+
+.section:last-child {
+  padding-bottom: clamp(64px, 9vw, 120px);
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 32px;
+  margin: 40px 0 48px;
+}
+
+.statement {
+  font: 400 clamp(28px, 3.2vw, 40px) / 1.05 var(--font-command);
+  letter-spacing: var(--tracking-tight);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.introBody {
+  max-width: 42ch;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Workflow tiles: one hairline grid, Dark Forest tiles that warm to green on hover. */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  background: var(--border);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 280px;
+  padding: 28px 24px 32px;
+  background: var(--bg-raised);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.step:hover {
+  background: var(--color-revolution-green);
+}
+
+.stepNo {
+  font: 400 64px/1 var(--font-command);
+  letter-spacing: var(--tracking-tight);
+  color: var(--signal);
+}
+
+.step h3 {
+  margin-top: auto;
+}
+
+.step p,
+.traits p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+/* Output */
+
+.output {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: start;
+  gap: clamp(32px, 6vw, 80px);
+}
+
+.outputCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+.traits {
+  display: grid;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traits li {
+  display: grid;
+  gap: 8px;
+  padding: 20px 0;
+  border-top: 1px solid var(--border-hair);
+}
+
+.code {
+  margin: 0;
+  padding: 40px;
+}
+
+.code figcaption {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-hair);
+  color: var(--fg-subtle);
+}
+
+.code pre {
+  margin: 0;
+  padding-top: 20px;
+  max-height: 36rem;
+  overflow: auto;
+  font: 400 13px/1.7 var(--font-command);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-light-sand-t1);
+}
+
+/* Closing call to action: a full brand panel */
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: clamp(56px, 8vw, 96px) 40px;
+  text-align: center;
+}
+
+.ctaTitle {
+  gap: 16px;
+  font-size: clamp(28px, 3.4vw, 44px);
+}
+
+.ctaBody {
+  margin-bottom: 8px;
+  color: var(--color-light-sand-t2);
+}
+
+/* Footer */
+
+.footer {
+  max-width: var(--page-width);
+  margin: 0 auto;
+  padding: 32px var(--page-margin) 40px;
+  border-top: 1px solid var(--border-hair);
+}
+
+.footerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.stamp {
+  font-size: 10px;
+  color: var(--fg-subtle);
+}
+
+.footerCols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+}
+
+.footerCols dt {
+  margin-bottom: 8px;
+  font-size: 10px;
+  color: var(--fg-subtle);
+}
+
+.footerCols dd {
+  margin: 0;
+  font-size: 15px;
+  color: var(--fg-muted);
+}
+
+.footerCols a {
+  text-decoration: none;
+}
+
+.footerCols a:hover {
+  color: var(--fg);
+}
+
+/* Responsive */
+
+@media (max-width: 960px) {
+  .hero {
+    min-height: auto;
+  }
+
+  .heroGrid,
+  .output,
+  .intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .navLinks {
+    display: none;
+  }
+
+  .nav .btn {
+    margin-left: auto;
+  }
+
+  .heroActions .btn {
+    flex: 1 1 100%;
+  }
+
+  .viewport {
+    aspect-ratio: 4 / 5;
+  }
+
+  .hudSeams li {
+    grid-template-columns: 30px 1fr auto;
+  }
+
+  .steps,
+  .footerCols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .step {
+    min-height: 0;
+  }
+
+  .step h3 {
+    margin-top: 16px;
+  }
+
+  .code {
+    padding: 32px 24px;
+  }
+
+  .ctaTitle {
+    gap: 12px;
+  }
+}

@@ -1,0 +1,33 @@
+.segmented {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgb(3 5 0 / 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.segmented button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+
+.segmented button:hover {
+  color: var(--fg);
+  background: var(--color-revolution-green);
+}
+
+.segmented button[aria-pressed='true'] {
+  color: var(--signal);
+  background: var(--color-revolution-green);
+}

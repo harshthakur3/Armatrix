@@ -1,0 +1,192 @@
+.page {
+  display: grid;
+  grid-template-columns: minmax(340px, 0.9fr) minmax(0, 1.1fr);
+  min-height: 100vh;
+}
+
+/* Brand panel (Revolution Green) */
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 56px clamp(44px, 5vw, 72px);
+}
+
+.brandBody {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quote {
+  max-width: 15ch;
+  font: 400 clamp(34px, 3.6vw, 52px) / 1.02 var(--font-command);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+.brandSteps {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 20px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--border-hair);
+  color: var(--color-light-sand-t2);
+}
+
+.brandSteps span {
+  display: inline-block;
+  width: 36px;
+  color: var(--signal);
+}
+
+/* Form side (Dark Forest) */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 48px var(--page-margin);
+}
+
+.mobileLogo {
+  display: none;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.tabs {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs button {
+  margin-bottom: -1px;
+  padding: 0 0 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.tabs button:hover {
+  color: var(--fg);
+}
+
+.tabs button[aria-pressed='true'] {
+  color: var(--fg);
+  border-bottom-color: var(--signal);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.header h1 {
+  font-size: 28px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form button[type='submit'] {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--fg-muted);
+}
+
+.field input {
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+  color: var(--fg);
+  font: 400 16px var(--font-transmit);
+  transition: border-color var(--dur-base) var(--ease-out);
+}
+
+.field input::placeholder {
+  color: var(--color-light-sand-t4);
+}
+
+.field input:hover {
+  border-color: rgb(246 246 238 / 0.28);
+}
+
+.field input:focus-visible {
+  outline: none;
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgb(233 127 1 / 0.18);
+}
+
+/* Success variant of the global .callout. */
+.notice {
+  border-color: var(--color-revolution-green-t4);
+  background: var(--color-revolution-green);
+}
+
+.switch {
+  margin-top: 28px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.switch button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--signal);
+  cursor: pointer;
+}
+
+.back {
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--fg);
+}
+
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .mobileLogo {
+    display: block;
+  }
+}

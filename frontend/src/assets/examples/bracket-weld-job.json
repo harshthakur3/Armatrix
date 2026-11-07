@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-07T18:17:38.145Z",
+  "part": {
+    "id": "a26a5434-2dd6-42af-b467-722568d6ade7",
+    "name": "bracket_L.stl",
+    "source_units": "mm",
+    "up_axis": "y"
+  },
+  "coordinate_frame": "stl_part",
+  "seams": [
+    {
+      "id": "S01",
+      "sequence": 1,
+      "process": "MIG",
+      "closed": false,
+      "path_mm": [
+        [
+          -1080,
+          120,
+          -800
+        ],
+        [
+          -1080,
+          120,
+          -50
+        ]
+      ],
+      "params": {
+        "current_a": 180,
+        "voltage_v": 22,
+        "wire_feed_m_min": 8,
+        "travel_speed_mm_s": 6,
+        "work_angle_deg": 45,
+        "travel_angle_deg": 10,
+        "weld_size_mm": 6
+      }
+    },
+    {
+      "id": "S02",
+      "sequence": 2,
+      "process": "MIG",
+      "closed": false,
+      "path_mm": [
+        [
+          -1080,
+          120,
+          50
+        ],
+        [
+          -1080,
+          120,
+          800
+        ]
+      ],
+      "params": {
+        "current_a": 180,
+        "voltage_v": 22,
+        "wire_feed_m_min": 8,
+        "travel_speed_mm_s": 6,
+        "work_angle_deg": 45,
+        "travel_angle_deg": 10,
+        "weld_size_mm": 6
+      }
+    },
+    {
+      "id": "S03",
+      "sequence": 3,
+      "process": "MIG",
+      "closed": false,
+      "path_mm": [
+        [
+          -1100,
+          120,
+          70
+        ],
+        [
+          -100,
+          120,
+          70
+        ]
+      ],
+      "params": {
+        "current_a": 180,
+        "voltage_v": 22,
+        "wire_feed_m_min": 8,
+        "travel_speed_mm_s": 6,
+        "work_angle_deg": 45,
+        "travel_angle_deg": 10,
+        "weld_size_mm": 6
+      }
+    },
+    {
+      "id": "S04",
+      "sequence": 4,
+      "process": "MIG",
+      "closed": false,
+      "path_mm": [
+        [
+          -1080,
+          100,
+          70
+        ],
+        [
+          -1080,
+          1100,
+          70
+        ]
+      ],
+      "params": {
+        "current_a": 180,
+        "voltage_v": 22,
+        "wire_feed_m_min": 8,
+        "travel_speed_mm_s": 6,
+        "work_angle_deg": 45,
+        "travel_angle_deg": 10,
+        "weld_size_mm": 6
+      }
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: clamp(32px, 5vw, 56px) var(--page-margin) 64px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.count {
+  color: var(--fg-subtle);
+}
+
+.error {
+  margin-bottom: 24px;
+}
+
+/* Parts list: one row per part, a hairline grid like the rest of the brand. */
+
+.columns,
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 190px 80px;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+}
+
+.columns {
+  /* Leaves room for the delete button column on the right of each row. */
+  padding-right: calc(20px + 76px);
+  padding-bottom: 12px;
+  color: var(--fg-subtle);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.list li {
+  display: flex;
+  border-bottom: 1px solid var(--border-hair);
+  /* Off-screen rows skip layout and paint until scrolled into view. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
+}
+
+.row {
+  flex: 1;
+  min-width: 0;
+  min-height: 64px;
+  text-decoration: none;
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.row:hover,
+.row:focus-visible {
+  background: var(--color-revolution-green);
+}
+
+.name {
+  overflow: hidden;
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  font: 400 14px var(--font-transmit);
+  color: var(--fg-muted);
+}
+
+.open {
+  justify-self: end;
+  color: var(--signal);
+}
+
+.hint {
+  margin-top: 20px;
+  color: var(--fg-subtle);
+}
+
+.delete {
+  flex: none;
+  width: 76px;
+  border: 0;
+  border-left: 1px solid var(--border-hair);
+  background: none;
+  color: var(--fg-subtle);
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
+}
+
+.delete:hover,
+.delete[data-confirming] {
+  color: var(--color-dark-forest);
+  background: var(--signal);
+}
+
+/* Empty state */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: clamp(64px, 10vw, 112px) 40px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: clamp(26px, 3vw, 36px);
+  text-transform: uppercase;
+}
+
+.emptyBody {
+  max-width: 40ch;
+  margin-bottom: 12px;
+  color: var(--color-light-sand-t2);
+}
+
+@media (max-width: 720px) {
+  .columns {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+    padding: 14px 16px;
+  }
+
+  .row .meta:nth-of-type(3),
+  .open {
+    display: none;
+  }
+}
